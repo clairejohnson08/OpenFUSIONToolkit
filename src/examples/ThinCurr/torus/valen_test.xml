@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<oft>
+  <thincurr>
+    <eta>5.000000E-06 4.000000E+20</eta>
+    <vcoils>
+      <coil_set name="VCoil_1" radius="1.0" res_per_len="1.7e-08">
+        <coil scale="1.0">1.500000E+00, 0.000000E+00</coil>
+        <coil scale="1.0">1.500000E+00, 2.000000E-01</coil>
+      </coil_set>
+    </vcoils>
+  </thincurr>
+</oft>

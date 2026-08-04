@@ -60,12 +60,6 @@ class VALENSystem:
         self.Mdw = mode_drive @ Mdw_full[:mode_start,:torus_start]
         self.Mwd = self.Mdw.T
 
-        '''
-        Mdw_full = tw_mode.cross_eval(tw_torus, mode_drive)
-        self.Mdw = Mdw_full[:,:torus_start]
-        self.Mwd = self.Mdw.T '''
-        
-        # mode_drive = mode_drive[:,:mode_start]
         self.Ld = mode_drive @ Ld_full @ mode_drive.T
         self.Mdc = mode_drive @ Mdc_full
         self.Mcd = self.Mdc.T
@@ -74,12 +68,12 @@ class VALENSystem:
         tw_torus.compute_Rmat(copy_out=True)
         tw_mode.compute_Rmat(copy_out=True)        
 
-        Rc = tw_torus.Rmat[torus_start:, torus_start:]
-        Rw = tw_torus.Rmat[:torus_start,:torus_start]
+        self.Rc = tw_torus.Rmat[torus_start:, torus_start:]
+        self.Rw = tw_torus.Rmat[:torus_start,:torus_start]
         Rd_full = tw_mode.Rmat[:mode_start,:mode_start]
-        Rd = mode_drive @ Rd_full @ mode_drive.T
+        self.Rd = mode_drive @ Rd_full @ mode_drive.T
 
-        self.R = scipy.linalg.block_diag(Rw, Rc, Rd) 
+        self.R = scipy.linalg.block_diag(self.Rw, self.Rc, self.Rd) 
 
     
 
@@ -93,27 +87,26 @@ class VALENSystem:
         '''
 
         P = (-1/(s+a*1j))*np.identity(2)
-        rho = np.linalg.inv(self.Ld)@(P-1)
+        self.rho = np.linalg.inv(self.Ld)@(P-np.indentity(2))
         
         
-        Lw_ef = self.Lw + self.Mwd @ rho @ self.Mdw
-        Lwd_ef = self.Mwd + self.Mwd @ rho @ self.Ld
-        Ldw_ef = self.Mdw + self.Ld @ rho @ self.Mdw
-        Ld_ef = self.Ld + self.Ld @ rho @ self.Ld
+        self.Lw_ef = self.Lw + self.Mwd @ self.rho @ self.Mdw
+        self.Lwd_ef = self.Mwd + self.Mwd @ self.rho @ self.Ld
+        self.Ldw_ef = self.Mdw + self.Ld @ self.rho @ self.Mdw
+        self.Ld_ef = self.Ld + self.Ld @ self.rho @ self.Ld
 
-        Lwc_ef = self.Mwc + self.Mwd @ rho @ self.Mdc
-        Ldc_ef = self.Mdc + self.Ld @ rho @ self.Mdc
-        Lcw_ef = Lwc_ef.T 
-        '''using my version of Lc, assuming the Lc equation in Battey is a typo!!!'''
-        Lc_ef = self.Lc + self.Mcd @ rho @ self.Mdc
-        Lcd_ef = Ldc_ef.T 
-
+        self.Lwc_ef = self.Mwc + self.Mwd @ self.rho @ self.Mdc
+        self.Ldc_ef = self.Mdc + self.Ld @ self.rho @ self.Mdc
+        self.Lcw_ef = self.Lwc_ef.T 
+        self.Lc_ef = self.Lc + self.Mcd @ self.rho @ self.Mdc
+        self.Lcd_ef = self.Ldc_ef.T 
 
         self.L_ef = np.block([
-            [Lw_ef, Lwc_ef, Lwd_ef],
-            [Lcw_ef, Lc_ef, Lcd_ef],
-            [Ldw_ef, Ldc_ef, Ld_ef]
+            [self.Lw_ef, self.Lwc_ef, self.Lwd_ef],
+            [self.Lcw_ef, self.Lc_ef, self.Lcd_ef],
+            [self.Ldw_ef, self.Ldc_ef, self.Ld_ef]
         ])
+
 
     def eigenvalues(self,k=20):
         '''! Compute eigenvalues of the homogeneous equation 9 system
